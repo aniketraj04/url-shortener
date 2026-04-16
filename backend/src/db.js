@@ -1,16 +1,32 @@
-// db.js - create a mysql2 promise pool
-const mysql = require('mysql2/promise');
+// db.js - create a sqlite3 database
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 3306,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+const dbPath = path.join(__dirname, '..', 'database.db');
+const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    console.error('Error opening database:', err.message);
+  } else {
+    console.log('Connected to SQLite database.');
+    initializeDatabase();
+  }
 });
 
-module.exports = pool;
+// Enable foreign keys
+db.run('PRAGMA foreign_keys = ON');
+
+function initializeDatabase() {
+  const schemaPath = path.join(__dirname, 'sql', 'schema.sql');
+  const schema = fs.readFileSync(schemaPath, 'utf8');
+  db.exec(schema, (err) => {
+    if (err) {
+      console.error('Error initializing database:', err.message);
+    } else {
+      console.log('Database initialized.');
+    }
+  });
+}
+
+module.exports = db;

@@ -7,7 +7,10 @@ export default function LinkList() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetchLinks();
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetchLinks();
+    }
   }, []);
 
   async function fetchLinks() {
@@ -20,7 +23,7 @@ export default function LinkList() {
   }
 
   if (error) return <div className="text-red-500">{error}</div>;
-  if (!links.length) return <div>No links yet.</div>;
+  if (!links.length) return <div>No links yet. <Link to="/login" className="text-blue-600">Login</Link> to see your links.</div>;
 
   return (
     <div>

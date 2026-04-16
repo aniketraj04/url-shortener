@@ -1,49 +1,49 @@
--- create database (run in MySQL)
-CREATE DATABASE IF NOT EXISTS url_shortener;
-USE url_shortener;
+-- create database (SQLite)
+-- Run this in SQLite
 
 CREATE TABLE IF NOT EXISTS users (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100),
-  email VARCHAR(255) NOT NULL UNIQUE,
-  password_hash VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT,
+  email TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS links (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  owner_id BIGINT NULL,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  owner_id INTEGER NULL,
   original_url TEXT NOT NULL,
-  short_code VARCHAR(64) UNIQUE,
-  custom_alias VARCHAR(128) UNIQUE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  expires_at TIMESTAMP NULL,
-  click_count BIGINT DEFAULT 0,
+  short_code TEXT UNIQUE,
+  custom_alias TEXT UNIQUE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  expires_at DATETIME NULL,
+  click_count INTEGER DEFAULT 0,
   FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS clicks (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  link_id BIGINT NOT NULL,
-  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  ip VARCHAR(45),
-  country VARCHAR(64),
-  region VARCHAR(128),
-  city VARCHAR(128),
-  referrer VARCHAR(512),
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  link_id INTEGER NOT NULL,
+  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+  ip TEXT,
+  country TEXT,
+  region TEXT,
+  city TEXT,
+  referrer TEXT,
   user_agent TEXT,
-  device_type VARCHAR(32),
-  browser VARCHAR(64),
-  os VARCHAR(64),
-  FOREIGN KEY (link_id) REFERENCES links(id) ON DELETE CASCADE,
-  INDEX (link_id),
-  INDEX (timestamp),
-  INDEX (country)
+  device_type TEXT,
+  browser TEXT,
+  os TEXT,
+  FOREIGN KEY (link_id) REFERENCES links(id) ON DELETE CASCADE
 );
 
+CREATE INDEX IF NOT EXISTS idx_clicks_link_id ON clicks(link_id);
+CREATE INDEX IF NOT EXISTS idx_clicks_timestamp ON clicks(timestamp);
+CREATE INDEX IF NOT EXISTS idx_clicks_country ON clicks(country);
+
 CREATE TABLE IF NOT EXISTS daily_link_aggregates (
-  link_id BIGINT,
+  link_id INTEGER,
   date DATE,
-  clicks INT DEFAULT 0,
+  clicks INTEGER DEFAULT 0,
   PRIMARY KEY (link_id, date)
 );
